@@ -1,0 +1,6 @@
+-infile
+-outfilePrefix
+-maxTracePerShot
+-leftTraceIndex
+-rightTraceIndex
+-maxShotNumber
