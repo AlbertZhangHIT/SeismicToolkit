@@ -32,6 +32,6 @@ Run `Compile.m` in `mex` folder. (Don't forget to set up your C++ compiler)
 
 2. Extracting certain traces from SGY file 
 
-   Two functions `readCertainTraces.m` and `tracesExtract.m` are provided. The first one enable us to read the data of the assigned traces from MATLAB while the latter stores the extracted traces into a new SEGY file.
+   [transferVelocitytoMat.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/transferVelocitytoMat.m) is an example using function `readCertainTraces` to load velocity data from SGY file. The segy file can be download from [SEG open data](https://s3.amazonaws.com/open.source.geoscience/open_data/hessvti/timodel_vp.segy.gz). The loaded velocity data is presented as follows.
 
-![](/figs/hessvti.png)
+&emsp;&emsp;![](/figs/hessvti.png)
