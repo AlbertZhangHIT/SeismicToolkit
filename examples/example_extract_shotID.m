@@ -1,10 +1,8 @@
-% This script aims at extract pre-assigned shots from large sgy file
+% This script extracts pre-assigned shots from large sgy file
 
-%inFile = 'D:\SeismicDataSet\CNN\Northwest_AI\005Split\005_3A_group_dctl_8337_shotID_443676_450848.sgy';
-%outPrefix = 'D:\SeismicDataSet\CNN\Northwest_AI\TrainSet\005_dctl_8337';
-inFile = 'E:\Datasets\SeismicData\Lab\P1007_NUCNS_AGORA2_SHOT_FLATST.SGY';
-outPrefix = 'E:\Projects\LabProject\VSP3D-master\3D_SHOT_2.segy';
-ShotID = [30321, 102116];
+inFile = 'E:\Datasets\SeismicData\SEG\C3_45shot\SEG_45Shot_shots1-9.sgy';
+outPrefix = 'E:\Datasets\SeismicData\SEG\C3_45shot\SEG_45Shot_shots1.sgy';
+ShotID = [1];
 
 tic
 shotExtract(inFile, outPrefix, ShotID);

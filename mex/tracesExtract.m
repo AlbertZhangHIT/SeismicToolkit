@@ -25,6 +25,6 @@ if ~exist('firstTraceIndex', 'var')
 	firstTraceIndex = 1;
 end
 
-mexGatherSplit(infile, outprefix, firstTraceIndex, lastTraceIndex, maxTracePerGather, maxGatherNumber);
+mexTraceExtract(infile, outprefix, firstTraceIndex, lastTraceIndex, maxTracePerGather, maxGatherNumber);
 
 end

@@ -63,7 +63,7 @@ for i = 1 : useFiles % for training
     data_file = fullfile(data_folder, data_filepaths(i).name);
     shotID = data_file(end-17:end-4);
     label_file = fullfile(label_folder, label_filepaths(i).name);
-    if isempty(strfind(label_file, shotID))
+    if ~contains(label_file, shotID)
         disp('Label file does not match data file. ')
     else
         offset = 3600;
