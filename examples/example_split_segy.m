@@ -2,7 +2,7 @@
 
 inFile = 'D:\SeismicDataSet\CNN\Northwest_AI\005Split\005_3A_group_dctl_8337_shotID_443676_450848.sgy';
 outPrefix = 'D:\SeismicDataSet\CNN\Northwest_AI\TrainSet\005\005_dctl_8337';
-shotPerfile = 1;
-maxTracesPerShot = 294;
+gatherPerfile = 1;
+maxTracesPerGather = 294;
 
-shotSplit(inFile, outPrefix, shotPerfile, maxTracesPerShot);
+shotSplit(inFile, outPrefix, gatherPerfile, maxTracesPerShot);

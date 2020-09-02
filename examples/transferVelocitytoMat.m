@@ -1,14 +1,15 @@
 %%% Extract velocity model in sgy file and save it into .mat 
 
-sgyFile = '../../SEG/hessvti/timodel_vp.segy';
+sgyFile = 'timodel_vp.segy';
 
-savepath = '../../VelModel/velocities/hessvti.mat';
+savepath = 'hessvti.mat';
 
 [numTraces, numTracesPerGather, numSamplePerTrace, sampleFormat, ~] = sgyParser(sgyFile);
 
 offset = 3600;
 vel = readCertainTraces(sgyFile, numTraces, numSamplePerTrace, sampleFormat);
 
-figure, imagesc(vel), colorbar
+fig = figure('Position', [100, 100, 500, 300]); set(gcf, 'color', 'white');
+imagesc(vel), colorbar
 
-save(savepath, 'vel')
+print(fig, ['../figs/hessvti.png'], '-dpng');

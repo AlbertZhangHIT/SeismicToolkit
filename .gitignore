@@ -50,6 +50,7 @@ Makefile
 
 mex/*.mex*
 examples/*
-bin/*
+bin/
 src/*.o
 src/*.d
+figs/
