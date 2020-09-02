@@ -34,4 +34,4 @@ Run `Compile.m` in `mex` folder. (Don't forget to set up your C++ compiler)
 
    Two functions `readCertainTraces.m` and `tracesExtract.m` are provided. The first one enable us to read the data of the assigned traces from MATLAB while the latter stores the extracted traces into a new SEGY file.
 
-![](/figs/hessvti.png =200x)
+![](/figs/hessvti.png)
