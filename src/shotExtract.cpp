@@ -3,7 +3,7 @@
 	Written by Hao Zhang
 */
 #include "basic_inc.hpp"
-#include "preReader.hpp"
+#include "io.hpp"
 #include "vhead.hpp"
 
 using namespace std;
@@ -36,28 +36,21 @@ int main(int argc, char* argv[])
 	{istringstream ss((*mIter).second);	ss >> fnIn;}
 
 	char fnOut[1000];
-	mIter = opts.find("-outfilePrefix"); assert(mIter != opts.end());
+	mIter = opts.find("-outfile"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second);	ss >> fnOut;}
 
-	int maxTracePerShot = 100000;
-	mIter = opts.find("-maxTracePerShot");	assert(mIter != opts.end());
-	{istringstream ss((*mIter).second);	ss >> maxTracePerShot;}
+	int ShotID = 3;
+	mIter = opts.find("-ShotID"); assert(mIter != opts.end());
+	{istringstream ss((*mIter).second); ss >> ShotID;}
 
-	int leftShotID = 3;
-	mIter = opts.find("-leftShotID"); assert(mIter != opts.end());
-	{istringstream ss((*mIter).second); ss >> leftShotID;}
 
-	int rightShotID = 1000;
-	mIter = opts.find("-rightShotID"); assert(mIter != opts.end());
-	{istringstream ss((*mIter).second); ss >> rightShotID;}	
-
-	int maxShotNumber = 1000000;
-	mIter = opts.find("-maxShotNumber"); assert(mIter != opts.end());
-	{istringstream ss((*mIter).second); ss >> maxShotNumber;}
  
-	long long i64 = 0;
-	long long fileSize;
+	long i64 = 0;
+	long i64out = 0;
+	long fileSize;
 	char buf1[1];
+	char buf4[4];
+	char bufTraceHeader[240];
 	char buf3600[charVolumeHeader];
 	int statusError;
 
@@ -72,9 +65,9 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	fseeko(streamIn, 0, SEEK_END);
-	fileSize = ftello64(streamIn);
-	fseeko(streamIn, 0, SEEK_SET);
+	fseek(streamIn, 0, SEEK_END);
+	fileSize = ftell(streamIn);
+	fseek(streamIn, 0, SEEK_SET);
 
 	fread(buf3600, sizeof(char), charVolumeHeader, streamIn);
 	i64 += charVolumeHeader;
@@ -102,90 +95,52 @@ int main(int argc, char* argv[])
 			 << endl;
 	}
 
-	/* Get summary information of the input segy file */
-	int shotsCount, tracesCount;
-	long long **preParam;
-	preParam = new long long *[maxShotNumber];
-	for (int i = 0; i < maxShotNumber; i++)
-		preParam[i] = new long long[3];
-	preReader2D(streamIn, preParam, maxTracePerShot, nSample, bSample, shotsCount, tracesCount);
-
-	cout << "--------------- Summary Information -------------\n" 
-		 << "#Traces    \t\t : " << tracesCount << "\n"
-		 << "#Shots     \t\t : " << shotsCount << "\n"
-		 << "First FFID \t\t : " << preParam[0][0] << "\n"
-		 << "Last  FFID \t\t : " << preParam[shotsCount-1][0] << "\n"
-		 << endl;
-
-	/*Check whether the input parameters are valid*/
-	int minShotID = preParam[0][0];
-	int maxShotID = preParam[shotsCount-1][0];
-	int tempID = minShotID;
-	if (minShotID > maxShotID)
-	{
-		tempID = maxShotID;
-		maxShotID = minShotID;
-		minShotID = tempID;
-	} 
-/*	if (leftShotID > rightShotID)
-	{
-		cout << "Invalid. leftShotID should not be larger than rightShotID" << endl;
-		return 1;
-	}*/
-	if (leftShotID < minShotID | leftShotID > maxShotID | rightShotID < minShotID | rightShotID > maxShotID)
-	{
-		cout << "The assigned shot IDs are invalid. Please check your input\n" 
-			 << "Min shot index: " << minShotID << "\n"
-			 << "Max shot index: " << maxShotID
-			 << endl;
-		return 1;
-	}
-
-	/*Locate */
-	long long leftPos, rightPos, curPos, outPos;
-	int charPerTrace = bSample*nSample + charTraceHeader; 
-	char bufTrace[charPerTrace];
-
-	leftPos = -1;
-	rightPos = -1;
-	for (int i = 0; i < shotsCount; i++)
-	{
-		if(preParam[i][0] == leftShotID)
-			leftPos = preParam[i][1];
-		if(preParam[i][0] == rightShotID)
-			rightPos = preParam[i][2];
-	}
-	if (leftPos == -1)
-	{
-		cout << "Invalid. There is no shot indexed leftShotID: " << leftShotID << endl;
-		return 1;
-	}
-	if (rightPos == -1)
-	{
-		cout << "Invalid. There is no shot indexed rightShotID: " << rightShotID << endl;
-		return 1;
-	}
-
-	curPos = leftPos;
-	outPos = 3600;
-
-	char fnTemp[1000];
-	sprintf(fnTemp, "%s_shotID_%d_%d.sgy", fnOut, leftShotID, rightShotID);
-	streamOut = fopen(fnTemp, "wb");
+	streamOut = fopen(fnOut, "wb");
 	fwrite(buf3600, sizeof(char), charVolumeHeader, streamOut);
-	cout << "Extracting shot indexed: " << leftShotID << "--" << rightShotID << "\n"
-		 << "Writing to File: " << fnTemp << endl;
-	while(curPos < rightPos)
-	{
-		fseeko(streamIn, curPos, SEEK_SET);
-		fread(bufTrace, sizeof(char), charPerTrace, streamIn);
-		fseeko(streamOut, outPos, SEEK_SET);
-		fwrite(bufTrace, sizeof(char), charPerTrace, streamOut);
-		curPos += charPerTrace;
-		outPos += charPerTrace;
+	i64out += charVolumeHeader;
+
+	int byteTrace = nSample * bSample;
+	char bufTraceData[byteTrace];
+	int shotId, i; 
+	while(!feof(streamIn) && i64<fileSize) {
+		fseek(streamIn, i64, SEEK_SET);
+		// check whether reach the end
+		fread(buf1, sizeof(char), 1, streamIn);
+		if(feof(streamIn))
+			break;
+		else
+			fseek(streamIn, -1, SEEK_CUR);
+		// read trace header
+		fread(bufTraceHeader, sizeof(char), 240, streamIn);
+		i64 += 240;
+		// extract shot FFID
+		for(i = 0; i < 4; i++)
+			buf4[i] = bufTraceHeader[8 + i];
+		stack_mov_4(buf4);	
+		shotId = *((int *) buf4);	
+
+		// read trace data
+		fseek(streamIn, i64, SEEK_SET);
+		fread(bufTraceData, sizeof(char), byteTrace, streamIn);
+		i64 += byteTrace;
+
+		if(shotId == ShotID){
+			// This trace should be output
+			fseek(streamOut, i64out, SEEK_SET);
+			fwrite(bufTraceHeader, sizeof(char), 240, streamOut);
+			i64out += 240;
+			fseek(streamOut, i64out, SEEK_SET);
+			fwrite(bufTraceData, sizeof(char), byteTrace, streamOut);
+			i64out += byteTrace;
+		}
 	}
+
 	cout << "Well done!" << endl;
+	fclose(streamIn);
 	fclose(streamOut);
 	
+	free(bufTraceHeader);
+	free(bufTraceData);
+
 	return 0;
 }

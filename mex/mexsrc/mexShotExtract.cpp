@@ -4,16 +4,16 @@
 */
 #include "mex.h"
 #include "basic_inc.hpp"
-#include "preReader.hpp"
+#include "io.hpp"
 #include "vhead.hpp"
 using namespace std;
 extern void _main();
 
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
-	if(nrhs != 6)
+	if(nrhs != 4)
 	{
-		mexErrMsgTxt("6 inputs required!");
+		mexErrMsgTxt("4 inputs required!");
 		return;
 	}
 	if(nlhs > 0)
@@ -21,26 +21,22 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		mexErrMsgTxt("no output required!");
 		return;
 	}
-	char* fnIn;
-	char* fnOut;
-	int maxTracePerShot;
-	int leftShotID;
-	int rightShotID;
-	int maxShotNumber;
 
-	fnIn = mxArrayToString(prhs[0]);
-	fnOut = mxArrayToString(prhs[1]);
-	leftShotID = int(mxGetScalar(prhs[2]));
-	rightShotID = int(mxGetScalar(prhs[3]));
-	maxTracePerShot = int(mxGetScalar(prhs[4]));
-	maxShotNumber = int(mxGetScalar(prhs[5]));
+	char* fnIn = mxArrayToString(prhs[0]);
+	char* fnOut = mxArrayToString(prhs[1]);
+	double* ShotIDs = (double *) mxGetData(prhs[2]);
+	int numIDs = (int) mxGetScalar(prhs[3]);
+
 
 	__int64 i64 = 0;
+	__int64 i64out = 0;
 	int charTraceHeader = 240;
 	int charVolumeHeader = 3600;	
 
 	char buf1[1];
 	char buf3600[3600];
+	char buf4[4];
+	char bufTraceHeader[240];	
 	int statusError;
 
 	FILE * streamIn;
@@ -51,11 +47,19 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	{
 		mexPrintf("Error: Failed in opening file \"%s\". Please check it.\n", fnIn);
 		return;
+	} else{
+		mexPrintf("Opening file \"%s\" \n", fnIn);
+		mexPrintf("\t attempting to extract %d shots of data...\n", fnIn, numIDs);
 	}
 
 	_fseeki64(streamIn, 0, SEEK_END);
 	__int64 fileSize = _ftelli64(streamIn);
 	_fseeki64(streamIn, 0, SEEK_SET);
+
+	if(fileSize < 0){
+		mexPrintf("Error! File size %d\n", fileSize);
+		return;
+	}
 
 	fread(buf3600, sizeof(char), 3600, streamIn);
 	i64 += 3600;
@@ -76,94 +80,54 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		mexPrintf("Error: Failed in parsing volume header.\n");
 		return;
 	} else{
-		mexPrintf("Segy File: %s volume parsing out: \n", fnIn);
+		mexPrintf("Volume parsing out: \n", fnIn);
 		mexPrintf("Trace Samples: %d \n", nSample);
 		mexPrintf("Sample Rate: %.5f s\n", rSample);
 		mexPrintf("Sample Byte: %d\n", bSample);
 	}
 
-	/* Get summary information of the input segy file */
-	int shotsCount, tracesCount;
-	long long **preParam;
-	preParam = new long long *[maxShotNumber];
-	for (int i = 0; i < maxShotNumber; i++)
-		preParam[i] = new long long[3];
-	preReader2D(streamIn, preParam, maxTracePerShot, nSample, bSample, shotsCount, tracesCount);
-
-	mexPrintf("--------------- Summary Information -------------\n"); 
-	mexPrintf("#Traces    \t\t : %d\n", tracesCount);
-	mexPrintf("#Shots     \t\t : %d\n", shotsCount);
-	mexPrintf("First FFID \t\t : %d\n", preParam[0][0]);
-	mexPrintf("Last  FFID \t\t : %d\n", preParam[shotsCount-1][0]);
-
-	/*Check whether the input parameters are valid*/
-	int minShotID = preParam[0][0];
-	int maxShotID = preParam[shotsCount-1][0]; 
-	int tempID = minShotID;	
-	if (minShotID > maxShotID)
-	{
-		tempID = maxShotID;
-		maxShotID = minShotID;
-		minShotID = tempID;
-	} 
-//	if (leftShotID > rightShotID)
-//	{
-//		mexPrintf("Invalid. leftShotID should not be larger than rightShotID.\n");
-//		return;
-//	}
-	if (leftShotID < minShotID | leftShotID > maxShotID | rightShotID < minShotID | rightShotID > maxShotID)
-	{
-		mexPrintf("The assigned shot IDs are invalid. Please check your input.\n"); 
-		mexPrintf("Min shot index: %d.\n", minShotID);
-		mexPrintf("Max shot index: %d.\n", maxShotID);
-		return;
-	}
-
-	/*Locate */
-	long long leftPos, rightPos, curPos, outPos;
-	int charPerTrace = bSample*nSample + charTraceHeader; 
-	char *bufTrace;
-	bufTrace = new char[charPerTrace];
-
-	leftPos = -1;
-	rightPos = -1;
-	for (int i = 0; i < shotsCount; i++)
-	{
-		if(preParam[i][0] == leftShotID)
-			leftPos = preParam[i][1];
-		if(preParam[i][0] == rightShotID)
-			rightPos = preParam[i][2];
-	}
-	if (leftPos == -1)
-	{
-		mexPrintf("Invalid. There is no shot indexed leftShotID: %d.\n", leftShotID);
-		return;
-	}
-	if (rightPos == -1)
-	{
-		mexPrintf("Invalid. There is no shot indexed rightShotID: %d.\n", rightShotID);
-		return;
-	}
-
-	curPos = leftPos;
-	outPos = 3600;
-
-	char fnTemp[1000];
-	sprintf(fnTemp, "%s_shotID_%d_%d.sgy", fnOut, leftShotID, rightShotID);
-	streamOut = fopen(fnTemp, "wb");
+	streamOut = fopen(fnOut, "wb");
 	fwrite(buf3600, sizeof(char), charVolumeHeader, streamOut);
-	mexPrintf("Extracting shot indexed: %d -- %d \n.", leftShotID, rightShotID);
-	mexPrintf("Writing to File: %s\n.", fnTemp);
-	while(curPos < rightPos)
-	{
-		_fseeki64(streamIn, (__int64)curPos, SEEK_SET);
-		fread(bufTrace, sizeof(char), charPerTrace, streamIn);
-		_fseeki64(streamOut, (__int64)outPos, SEEK_SET);
-		fwrite(bufTrace, sizeof(char), charPerTrace, streamOut);
-		curPos += charPerTrace;
-		outPos += charPerTrace;
+	i64out += charVolumeHeader;
+
+	int byteTrace = nSample * bSample;
+	char bufTraceData[byteTrace];
+	int shotId, i, k; 
+	while(!feof(streamIn)) {
+		_fseeki64(streamIn, i64, SEEK_SET);
+		// check whether reach the end
+		fread(buf1, sizeof(char), 1, streamIn);
+		if(feof(streamIn))
+			break;
+		else
+			_fseeki64(streamIn, -1, SEEK_CUR);
+		// read trace header
+		fread(bufTraceHeader, sizeof(char), 240, streamIn);
+		i64 += 240;
+		// extract shot FFID
+		for(i = 0; i < 4; i++)
+			buf4[i] = bufTraceHeader[8 + i];
+		stack_mov_4(buf4);	
+		shotId = *((int *) buf4);	
+
+		// read trace data
+		_fseeki64(streamIn, i64, SEEK_SET);
+		fread(bufTraceData, sizeof(char), byteTrace, streamIn);
+		i64 += byteTrace;
+
+		for(k = 0; k < numIDs; k++)
+			if(shotId == (int)ShotIDs[k]){
+				// This trace should be output
+				_fseeki64(streamOut, i64out, SEEK_SET);
+				fwrite(bufTraceHeader, sizeof(char), 240, streamOut);
+				i64out += 240;
+				_fseeki64(streamOut, i64out, SEEK_SET);
+				fwrite(bufTraceData, sizeof(char), byteTrace, streamOut);
+				i64out += byteTrace;
+			}
 	}
+	mexPrintf("Writing data to \"%s\"\n", fnOut);
 	mexPrintf("Well done!\n");
+	fclose(streamIn);
 	fclose(streamOut);
-	delete[] bufTrace;
 }	

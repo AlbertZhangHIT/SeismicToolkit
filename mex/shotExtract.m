@@ -1,24 +1,14 @@
-function shotExtract(infile, outprefix, leftShotID, rightShotID, maxTracePerShot, maxShotNumber)
+function shotExtract(infile, outprefix, ShotID)
+% Single shot data extraction from setting shotID.
 % Parameter description:
 %   infile          -- the name/path of input file.
 %   outprefix       -- prefix of output file, the leftShotID, rightShotID
 %                      and '.sgy' will be added to this prefix
 %                      automatically to construct a full file name.
-%   leftShotID      -- the ID of shot which would be extracted first.
-%   rightShotID     -- the ID of shot which would be extracted last.
-%
-%   maxTracePerShot -- max number of traces in each shot, it should not be
-%                      smaller than the number of traces of each shot.
-%   maxShotNumber   -- max number of shots in the input file, it should not be
-%                      smaller than the number of shots in the input file.
+%   ShotID          -- array of the IDs of shots which would be extracted.
 
-if ~exist('maxShotNumber', 'var')
-	maxShotNumber = 1000000;
-end
-if ~exist('maxTracePerShot', 'var')
-	maxTracePerShot = 100000;
-end
+numIDs = length(ShotID);
 
-mexShotExtract(infile, outprefix, leftShotID, rightShotID, maxTracePerShot, maxShotNumber);
+mexShotExtract(infile, outprefix, ShotID, numIDs);
 
 end
