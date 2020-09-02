@@ -49,5 +49,7 @@ m4/lt~obsolete.m4
 Makefile
 
 mex/*.mex*
-examples/
+examples/*
 bin/*
+src/*.o
+src/*.d

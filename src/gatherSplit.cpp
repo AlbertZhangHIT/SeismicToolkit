@@ -41,13 +41,13 @@ int main(int argc, char* argv[])
 	mIter = opts.find("-maxTracePerShot");	assert(mIter != opts.end());
 	{istringstream ss((*mIter).second);	ss >> maxTracePerShot;}
 
-	int shotPerSubfile = 3;
-	mIter = opts.find("-shotPerSubfile"); assert(mIter != opts.end());
-	{istringstream ss((*mIter).second); ss >> shotPerSubfile;}
+	int gatherPerSubfile = 3;
+	mIter = opts.find("-gatherPerSubfile"); assert(mIter != opts.end());
+	{istringstream ss((*mIter).second); ss >> gatherPerSubfile;}
 
-	int maxShotNumber = 1000000;
-	mIter = opts.find("-maxShotNumber"); assert(mIter != opts.end());
-	{istringstream ss((*mIter).second); ss >> maxShotNumber;}
+	int maxGatherNumber = 1000000;
+	mIter = opts.find("-maxGatherNumber"); assert(mIter != opts.end());
+	{istringstream ss((*mIter).second); ss >> maxGatherNumber;}
  
 	long long i64 = 0;
 	long long fileSize;
@@ -97,51 +97,49 @@ int main(int argc, char* argv[])
 	}
 
 	/* Get summary information of the input segy file */
-	int shotsCount, tracesCount;
+	int gathersCount, tracesCount;
 	long long **preParam;
-	preParam = new long long *[maxShotNumber];
-	for (int i = 0; i < maxShotNumber; i++)
+	preParam = new long long *[maxGatherNumber];
+	for (int i = 0; i < maxGatherNumber; i++)
 		preParam[i] = new long long[3];
-	preReader2D(streamIn, preParam, maxTracePerShot, nSample, bSample, shotsCount, tracesCount);
+	preReader2D(streamIn, preParam, maxTracePerShot, nSample, bSample, gathersCount, tracesCount);
 
 	cout << "--------------- Summary Information -------------\n" 
 		 << "#Traces    \t\t : " << tracesCount << "\n"
-		 << "#Shots     \t\t : " << shotsCount << "\n"
-		 << "First FFID \t\t : " << preParam[0][0] << "\n"
-		 << "Last  FFID \t\t : " << preParam[shotsCount-1][0] << "\n"
+		 << "#Gathers     \t\t : " << gathersCount << "\n"
 		 << endl;
 
 	/* Check whether the input parameters are valid*/
-	if(shotPerSubfile > shotsCount)
+	if(gatherPerSubfile > gathersCount)
 	{
-		cout << "Parameter shotPerSubfile: " << shotPerSubfile << " is larger than number of shots: " 
-			 << shotsCount << "\n"
+		cout << "Parameter gatherPerSubfile: " << gatherPerSubfile << " is larger than number of gathers: " 
+			 << gathersCount << "\n"
 			 << "Please reset." 
 			 << endl;
 		return 1;
 	}
 
-	int rema = shotsCount%shotPerSubfile; 
+	int rema = gathersCount%gatherPerSubfile; 
 	int groups;
 	if(rema == 0)
-		groups = (int)(shotsCount/shotPerSubfile);
+		groups = (int)(gathersCount/gatherPerSubfile);
 	else
-		groups = (int)(shotsCount/shotPerSubfile) + 1;
+		groups = (int)(gathersCount/gatherPerSubfile) + 1;
 
 	char fnTemp[1000];
-	int shotIDleft, shotIDright, groupTraces;
+	int gatherIDleft, gatherIDright, groupTraces;
 	int byteTrace = nSample*bSample + 240;
 	char bufTrace[byteTrace];
 	long long posLeft, posRight, posCur, posOut;
 	for(int i = 1; i < groups; i++)
 	{
 		groupTraces = 0;
-		posLeft = preParam[(i-1)*shotPerSubfile][1];
-		posRight = preParam[i*shotPerSubfile-1][2];
+		posLeft = preParam[(i-1)*gatherPerSubfile][1];
+		posRight = preParam[i*gatherPerSubfile-1][2];
 		posCur = posLeft;
-		shotIDleft = preParam[(i-1)*shotPerSubfile][0];
-		shotIDright = preParam[i*shotPerSubfile-1][0];
-		sprintf(fnTemp, "%s_shotID_%d_%d.sgy", fnOut, shotIDleft, shotIDright);
+		gatherIDleft = preParam[(i-1)*gatherPerSubfile][0];
+		gatherIDright = preParam[i*gatherPerSubfile-1][0];
+		sprintf(fnTemp, "%s_gatherID_%d_%d.sgy", fnOut, gatherIDleft, gatherIDright);
 		streamOut = fopen(fnTemp, "wb");
 		fwrite(buf3600, sizeof(char), 3600, streamOut);
 		posOut = 3600;
@@ -157,8 +155,6 @@ int main(int argc, char* argv[])
 		}
 		cout << "Task " << i << ": Writing to " << fnTemp << "\n" 
 			 << "\t\t | Traces " << groupTraces << " | "
-			 << "First ShotID " << shotIDleft << " | "
-			 << "Last ShotID " << shotIDright << " | "
 			 << endl;
 		fclose(streamOut);
 	}
@@ -167,17 +163,17 @@ int main(int argc, char* argv[])
 	groupTraces = 0;
 	if (rema == 0)
 	{
-		posLeft = preParam[(groups-1)*shotPerSubfile][1];
-		posRight = preParam[groups*shotPerSubfile-1][2];
-		shotIDleft = preParam[(groups-1)*shotPerSubfile][0];
-		shotIDright = preParam[groups*shotPerSubfile-1][0];
+		posLeft = preParam[(groups-1)*gatherPerSubfile][1];
+		posRight = preParam[groups*gatherPerSubfile-1][2];
+		gatherIDleft = preParam[(groups-1)*gatherPerSubfile][0];
+		gatherIDright = preParam[groups*gatherPerSubfile-1][0];
 	} else{
-		posLeft = preParam[(groups-1)*shotPerSubfile][1];
-		posRight = preParam[shotsCount-1][2];
-		shotIDleft = preParam[(groups-1)*shotPerSubfile][0];
-		shotIDright = preParam[shotsCount-1][0];
+		posLeft = preParam[(groups-1)*gatherPerSubfile][1];
+		posRight = preParam[gathersCount-1][2];
+		gatherIDleft = preParam[(groups-1)*gatherPerSubfile][0];
+		gatherIDright = preParam[gathersCount-1][0];
 	}
-	sprintf(fnTemp, "%s_shotID_%d_%d.sgy", fnOut, shotIDleft, shotIDright);
+	sprintf(fnTemp, "%s_gatherID_%d_%d.sgy", fnOut, gatherIDleft, gatherIDright);
 	streamOut = fopen(fnTemp, "wb");
 	fwrite(buf3600, sizeof(char), 3600, streamOut);
 	posOut = 3600;
@@ -193,8 +189,6 @@ int main(int argc, char* argv[])
 	}
 	cout << "Task " << groups << ": Writing to " << fnTemp << "\n" 
 		 << "\t\t | Traces " << groupTraces << " | "
-		 << "First ShotID " << shotIDleft << " | "
-		 << "Last ShotID " << shotIDright << " | "
 		 << endl;
 	}
 	fclose(streamOut);

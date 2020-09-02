@@ -1,6 +1,3 @@
--infile /mnt/d/SeismicDataSet/CNN/Northwest_AI/006_recgather_recnoise1_detect_line_8337.sgy
--outfilePrefix /mnt/d/SeismicDataSet/CNN/Northwest_AI/006_test_dtcl_8337
--maxTracePerShot 10000
--leftShotID 443676
--rightShotID 443680
--maxShotNumber 40000
+-infile 
+-outfile 
+-ShotID 

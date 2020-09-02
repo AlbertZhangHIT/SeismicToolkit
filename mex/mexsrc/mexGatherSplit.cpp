@@ -23,15 +23,15 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	}
 	char* fnIn;
 	char* fnOut;
-	int maxTracePerShot;
-	int shotPerSubfile;
-	int maxShotNumber;
+	int maxTracePerGather;
+	int gatherPerSubfile;
+	int maxGatherNumber;
 
 	fnIn = mxArrayToString(prhs[0]);
 	fnOut = mxArrayToString(prhs[1]);
-	maxTracePerShot = int(mxGetScalar(prhs[2]));
-	shotPerSubfile = int(mxGetScalar(prhs[3]));
-	maxShotNumber = int(mxGetScalar(prhs[4]));
+	maxTracePerGather = int(mxGetScalar(prhs[2]));
+	gatherPerSubfile = int(mxGetScalar(prhs[3]));
+	maxGatherNumber = int(mxGetScalar(prhs[4]));
 
 	__int64 i64 = 0;
 
@@ -52,6 +52,11 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	_fseeki64(streamIn, 0, SEEK_END);
 	__int64 fileSize = _ftelli64(streamIn);
 	_fseeki64(streamIn, 0, SEEK_SET);
+
+	if(fileSize < 0){
+		mexPrintf("Error! File size %d\n", fileSize);
+		return;
+	}
 
 	fread(buf3600, sizeof(char), 3600, streamIn);
 	i64 += 3600;
@@ -79,35 +84,33 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	}
 
 	/* Get summary information of the input segy file */
-	int shotsCount, tracesCount;
+	int gatherCount, tracesCount;
 	long long **preParam;
-	preParam = new long long *[maxShotNumber];
-	for (int i = 0; i < maxShotNumber; i++)
+	preParam = new long long *[maxGatherNumber];
+	for (int i = 0; i < maxGatherNumber; i++)
 		preParam[i] = new long long[3];
-	preReader2D(streamIn, preParam, maxTracePerShot, nSample, bSample, shotsCount, tracesCount);
+	preReader2D(streamIn, preParam, maxTracePerGather, nSample, bSample, gatherCount, tracesCount);
 
 	mexPrintf("--------------- Summary Information -------------\n"); 
 	mexPrintf("#Traces    \t\t : %d\n", tracesCount);
-	mexPrintf("#Shots     \t\t : %d\n", shotsCount);
-	mexPrintf("First FFID \t\t : %d\n", preParam[0][0]);
-	mexPrintf("Last  FFID \t\t : %d\n", preParam[shotsCount-1][0]);
+	mexPrintf("#Gathers     \t\t : %d\n", gatherCount);
 
 	/* Check whether the input parameters are valid*/
-	if(shotPerSubfile > shotsCount)
+	if(gatherPerSubfile > gatherCount)
 	{
-		mexPrintf("Parameter shotPerSubfile: %d is larger than number of shots: %d. Please reset.\n", shotPerSubfile, shotsCount); 
+		mexPrintf("Parameter gatherPerSubfile: %d is larger than number of gathers: %d. Please reset.\n", gatherPerSubfile, gatherCount); 
 		return;
 	}
 
-	int rema = shotsCount%shotPerSubfile; 
+	int rema = gatherCount%gatherPerSubfile; 
 	int groups;
 	if(rema == 0)
-		groups = (int)(shotsCount/shotPerSubfile);
+		groups = (int)(gatherCount/gatherPerSubfile);
 	else
-		groups = (int)(shotsCount/shotPerSubfile) + 1;
+		groups = (int)(gatherCount/gatherPerSubfile) + 1;
 
 	char fnTemp[1000];
-	int shotIDleft, shotIDright, groupTraces;
+	int gatherIDleft, gatherIDright, groupTraces;
 	int byteTrace = nSample*bSample + 240;
 	char* bufTrace;
 	bufTrace = new char[byteTrace];
@@ -115,12 +118,12 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	for(int i = 1; i < groups; i++)
 	{
 		groupTraces = 0;
-		posLeft = preParam[(i-1)*shotPerSubfile][1];
-		posRight = preParam[i*shotPerSubfile-1][2];
+		posLeft = preParam[(i-1)*gatherPerSubfile][1];
+		posRight = preParam[i*gatherPerSubfile-1][2];
 		posCur = posLeft;
-		shotIDleft = preParam[(i-1)*shotPerSubfile][0];
-		shotIDright = preParam[i*shotPerSubfile-1][0];
-		sprintf(fnTemp, "%s_shotID_%d_%d.sgy", fnOut, shotIDleft, shotIDright);
+		gatherIDleft = preParam[(i-1)*gatherPerSubfile][0];
+		gatherIDright = preParam[i*gatherPerSubfile-1][0];
+		sprintf(fnTemp, "%s_gatherID_%d_%d.sgy", fnOut, gatherIDleft, gatherIDright);
 		streamOut = fopen(fnTemp, "wb");
 		fwrite(buf3600, sizeof(char), 3600, streamOut);
 		posOut = 3600;
@@ -134,7 +137,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 			posOut += byteTrace;
 			groupTraces += 1;
 		}
-		mexPrintf("Task %d: Writing to %s \n \t\t | Traces %d | First ShotID %d | Last ShotID %d | \n", i, fnTemp, groupTraces, shotIDleft, shotIDright);
+		mexPrintf("Task %d: Writing to %s \n \t\t | Traces %d |\n", i, fnTemp, groupTraces);
 		fclose(streamOut);
 	}
 	// write the last group
@@ -142,17 +145,17 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	groupTraces = 0;
 	if (rema == 0)
 	{
-		posLeft = preParam[(groups-1)*shotPerSubfile][1];
-		posRight = preParam[groups*shotPerSubfile-1][2];
-		shotIDleft = preParam[(groups-1)*shotPerSubfile][0];
-		shotIDright = preParam[groups*shotPerSubfile-1][0];
+		posLeft = preParam[(groups-1)*gatherPerSubfile][1];
+		posRight = preParam[groups*gatherPerSubfile-1][2];
+		gatherIDleft = preParam[(groups-1)*gatherPerSubfile][0];
+		gatherIDright = preParam[groups*gatherPerSubfile-1][0];
 	} else{
-		posLeft = preParam[(groups-1)*shotPerSubfile][1];
-		posRight = preParam[shotsCount-1][2];
-		shotIDleft = preParam[(groups-1)*shotPerSubfile][0];
-		shotIDright = preParam[shotsCount-1][0];
+		posLeft = preParam[(groups-1)*gatherPerSubfile][1];
+		posRight = preParam[gatherCount-1][2];
+		gatherIDleft = preParam[(groups-1)*gatherPerSubfile][0];
+		gatherIDright = preParam[gatherCount-1][0];
 	}
-	sprintf(fnTemp, "%s_shotID_%d_%d.sgy", fnOut, shotIDleft, shotIDright);
+	sprintf(fnTemp, "%s_gatherID_%d_%d.sgy", fnOut, gatherIDleft, gatherIDright);
 	streamOut = fopen(fnTemp, "wb");
 	fwrite(buf3600, sizeof(char), 3600, streamOut);
 	posOut = 3600;
@@ -166,7 +169,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		posOut += byteTrace;
 		groupTraces += 1;
 	}
-	mexPrintf("Task %d: Writing to %s \n \t\t | Traces %d | First ShotID %d | Last ShotID %d | \n", groups, fnTemp, groupTraces, shotIDleft, shotIDright);
+	mexPrintf("Task %d: Writing to %s \n \t\t | Traces %d | \n", groups, fnTemp, groupTraces);
 	}
 	fclose(streamOut);
 	mexPrintf("Well done!\n");

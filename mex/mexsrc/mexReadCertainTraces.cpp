@@ -39,6 +39,10 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	_fseeki64(pFile, 0, SEEK_END);
 	__int64 fileSize = _ftelli64(pFile);
 	_fseeki64(pFile, 0, SEEK_SET);
+	if(fileSize < 0){
+		mexPrintf("Error! File size %d\n", fileSize);
+		return;
+	}
 	if(fileSize < offset){
 		mexPrintf("Error: Offset %d exceeds the file size %d.\n", offset, fileSize);
 		fclose(pFile);

@@ -1,23 +1,23 @@
 /*Author Hao Zhang, MathGeo Center, Harbin Institute of Technology*/
 
 /*This file pre-reads the trace headers of segy files to establish an index
-	mapping between FFIDs and data locations in segy file
+	mapping between gathers and data locations in segy file
 */
 #include "preReader.hpp"
 #include "io.hpp"
 using namespace std;
 
 void preReader2D(FILE* streamIn, long long **preParam, int maxTraces,
-  		int numSample, int byteSample, int& shotCount, int& tracesCount)
+  		int numSample, int byteSample, int& gatherCount, int& tracesCount)
 {
 	char bufHeader[240];
 	char buf4[4];
 	char buf1[1];
-	int shotTraceCount;
+	int gatherTraceCount;
 
-	int shotId_n = 0;
-	int shotId_p = 0;
-	int numShot;
+	int ffid_n = 0;
+	int ffid_p = 0;
+	int numGather;
 
 	int byteTraceData = numSample*byteSample;
 	char bufData[byteTraceData];
@@ -34,12 +34,12 @@ void preReader2D(FILE* streamIn, long long **preParam, int maxTraces,
 
 	int i, k;
 
-	numShot = -1;
+	numGather = -1;
 	tracesCount = 0;
 
 	while( !feof(streamIn) && (pos < fileSize) ) // may add some other condition
 	{
-		shotTraceCount = 0;
+		gatherTraceCount = 0;
 		startPos = pos;
 		
 		for(k = 0; k < maxTraces; k++)
@@ -51,7 +51,7 @@ void preReader2D(FILE* streamIn, long long **preParam, int maxTraces,
 			else
 				fseeko(streamIn, -1, SEEK_CUR);
 			
-			shotId_p = shotId_n;
+			ffid_p = ffid_n;
 			fseeko(streamIn, pos, SEEK_SET);
 			fread(bufHeader, sizeof(char), 240, streamIn); // read trace header
 			pos += 240;
@@ -60,9 +60,9 @@ void preReader2D(FILE* streamIn, long long **preParam, int maxTraces,
 			for(i = 0; i < 4; i++)
 				buf4[i] = bufHeader[8 + i];
 			stack_mov_4(buf4);
-			shotId_n = *((int *) buf4);
+			ffid_n = *((int *) buf4);
 
-			if(k != 0 && shotId_p != shotId_n){
+			if(k != 0 && ffid_p != ffid_n){
 				fseeko(streamIn, -240, SEEK_CUR);
 				pos -= 240;
 				break;
@@ -71,19 +71,18 @@ void preReader2D(FILE* streamIn, long long **preParam, int maxTraces,
 			fseeko(streamIn, pos, SEEK_SET);
 			fread(bufData, sizeof(char), byteTraceData, streamIn);
 			pos += byteTraceData;
-			shotTraceCount++;
+			gatherTraceCount++;
 		}
 
-		numShot++;
-		tracesCount += shotTraceCount;
-		//cout << "Shot " << numShot << " Traces: " << shotTraceCount << endl;
-		
-		preParam[numShot][0] = (long long)shotId_p;
-		preParam[numShot][1] = startPos;
-		preParam[numShot][2] = pos;
+		numGather++;
+		tracesCount += gatherTraceCount;
+
+		preParam[numGather][0] = (long long)numGather;
+		preParam[numGather][1] = startPos;
+		preParam[numGather][2] = pos;
 
 		//fread(buf1, sizeof(char), 1, streamIn);
 	}
-	shotCount = numShot + 1;
+	gatherCount = numGather + 1;
 	fseeko(streamIn, 3600, SEEK_SET);
 }

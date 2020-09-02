@@ -39,9 +39,9 @@ int main(int argc, char* argv[])
 	mIter = opts.find("-outfilePrefix"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second);	ss >> fnOut;}
 
-	int maxTracePerShot = 100000;
-	mIter = opts.find("-maxTracePerShot");	assert(mIter != opts.end());
-	{istringstream ss((*mIter).second);	ss >> maxTracePerShot;}
+	int maxTracePerGather = 100000;
+	mIter = opts.find("-maxTracePerGather");	assert(mIter != opts.end());
+	{istringstream ss((*mIter).second);	ss >> maxTracePerGather;}
 
 	int leftTraceIndex = 3;
 	mIter = opts.find("-leftTraceIndex"); assert(mIter != opts.end());
@@ -51,9 +51,9 @@ int main(int argc, char* argv[])
 	mIter = opts.find("-rightTraceIndex"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second); ss >> rightTraceIndex;}	
 
-	int maxShotNumber = 1000000;
-	mIter = opts.find("-maxShotNumber"); assert(mIter != opts.end());
-	{istringstream ss((*mIter).second); ss >> maxShotNumber;}
+	int maxGatherNumber = 1000000;
+	mIter = opts.find("-maxGatherNumber"); assert(mIter != opts.end());
+	{istringstream ss((*mIter).second); ss >> maxGatherNumber;}
  
 	long long i64 = 0;
 	long long fileSize;
@@ -103,18 +103,16 @@ int main(int argc, char* argv[])
 	}
 
 	/* Get summary information of the input segy file */
-	int shotsCount, tracesCount;
+	int gathersCount, tracesCount;
 	long long **preParam;
-	preParam = new long long *[maxShotNumber];
-	for (int i = 0; i < maxShotNumber; i++)
+	preParam = new long long *[maxGatherNumber];
+	for (int i = 0; i < maxGatherNumber; i++)
 		preParam[i] = new long long[3];
-	preReader2D(streamIn, preParam, maxTracePerShot, nSample, bSample, shotsCount, tracesCount);
+	preReader2D(streamIn, preParam, maxTracePerGather, nSample, bSample, gathersCount, tracesCount);
 
 	cout << "--------------- Summary Information -------------\n" 
 		 << "#Traces    \t\t : " << tracesCount << "\n"
-		 << "#Shots     \t\t : " << shotsCount << "\n"
-		 << "First FFID \t\t : " << preParam[0][0] << "\n"
-		 << "Last  FFID \t\t : " << preParam[shotsCount-1][0] << "\n"
+		 << "#Gathers     \t\t : " << gathersCount << "\n"
 		 << endl;
 
 	/*Check whether the input parameters are valid*/

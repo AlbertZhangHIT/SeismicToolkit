@@ -1,6 +1,6 @@
 -infile
 -outfilePrefix
--maxTracePerShot
+-maxTracePerGather
 -leftTraceIndex
 -rightTraceIndex
--maxShotNumber
+-maxGatherNumber
