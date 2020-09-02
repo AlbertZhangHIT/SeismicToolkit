@@ -1,6 +1,6 @@
 
-mex -I./../include mexsrc/mexReadCertainTraces.cpp mexsrc/io.cpp mexsrc/reader.cpp
-mex -I./../include mexsrc/mexGatherSplit.cpp mexsrc/preReader.cpp mexsrc/io.cpp mexsrc/vhead.cpp
-mex -I./../include mexsrc/mexShotExtract.cpp mexsrc/preReader.cpp mexsrc/io.cpp mexsrc/vhead.cpp
-mex -I./../include mexsrc/mexDifference.cpp mexsrc/io.cpp mexsrc/vhead.cpp
-mex -I./../include mexsrc/mexSgyParser.cpp mexsrc/io.cpp
+mex -I./../include mexsrc/mexReadCertainTraces.cpp ./../src/io.cpp mexsrc/reader.cpp
+mex -I./../include mexsrc/mexGatherSplit.cpp ./../src/preReader.cpp ./../src/io.cpp ./../src/vhead.cpp
+mex -I./../include mexsrc/mexShotExtract.cpp ./../src/preReader.cpp ./../src/io.cpp ./../src/vhead.cpp
+mex -I./../include mexsrc/mexDifference.cpp ./../src/io.cpp ./../src/vhead.cpp
+mex -I./../include mexsrc/mexSgyParser.cpp ./../src/io.cpp
