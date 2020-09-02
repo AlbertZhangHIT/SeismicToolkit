@@ -50,4 +50,4 @@ Makefile
 
 mex/*.mex*
 examples/
-bin/
+bin/*
