@@ -28,9 +28,6 @@ Run `Compile.m` in `mex` folder. (Don't forget to set up your C++ compiler)
 4. [readCertainTraces.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/readCertainTraces.m) This function directly read traces from the large SGY file. It is not recommend to use the function directly if you are unfamiliar with the structrue of SGY file. Instead I recommend you to use [tracesExtract.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/tracesExtract.m) combined with `ReadSegy`function from [segymat](http://segymat.sourceforge.net/). The example can be found in [example_readtraces.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/example_readtraces.m)
 
  # Examples
-1. Extracting all the gathers belong to one FFID
-
-2. Extracting certain traces from SGY file 
 
    [transferVelocitytoMat.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/transferVelocitytoMat.m) is an example using function `readCertainTraces` to load velocity data from SGY file. The segy file can be download from [SEG open data](https://s3.amazonaws.com/open.source.geoscience/open_data/hessvti/timodel_vp.segy.gz). The loaded velocity data is presented as follows.
 
