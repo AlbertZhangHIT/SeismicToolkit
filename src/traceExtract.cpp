@@ -39,19 +39,19 @@ int main(int argc, char* argv[])
 	mIter = opts.find("-outfilePrefix"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second);	ss >> fnOut;}
 
-	int maxTracePerGather = 100000;
+	int maxTracePerGather = 10000;
 	mIter = opts.find("-maxTracePerGather");	assert(mIter != opts.end());
 	{istringstream ss((*mIter).second);	ss >> maxTracePerGather;}
 
-	int leftTraceIndex = 3;
+	int leftTraceIndex = 1;
 	mIter = opts.find("-leftTraceIndex"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second); ss >> leftTraceIndex;}
 
-	int rightTraceIndex = 1000;
+	int rightTraceIndex = 2;
 	mIter = opts.find("-rightTraceIndex"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second); ss >> rightTraceIndex;}	
 
-	int maxGatherNumber = 1000000;
+	int maxGatherNumber = 10000;
 	mIter = opts.find("-maxGatherNumber"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second); ss >> maxGatherNumber;}
  
@@ -155,6 +155,7 @@ int main(int argc, char* argv[])
 		outPos += charPerTrace;
 	}
 	cout << "Well done!" << endl;
+	fclose(streamIn);
 	fclose(streamOut);
 
 	

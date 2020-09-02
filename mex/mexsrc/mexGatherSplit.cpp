@@ -21,17 +21,12 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		mexErrMsgTxt("no output required!");
 		return;
 	}
-	char* fnIn;
-	char* fnOut;
-	int maxTracePerGather;
-	int gatherPerSubfile;
-	int maxGatherNumber;
 
-	fnIn = mxArrayToString(prhs[0]);
-	fnOut = mxArrayToString(prhs[1]);
-	maxTracePerGather = int(mxGetScalar(prhs[2]));
-	gatherPerSubfile = int(mxGetScalar(prhs[3]));
-	maxGatherNumber = int(mxGetScalar(prhs[4]));
+	char* fnIn = mxArrayToString(prhs[0]);
+	char* fnOut = mxArrayToString(prhs[1]);
+	int maxTracePerGather = (int)mxGetScalar(prhs[2]);
+	int gatherPerSubfile = (int)mxGetScalar(prhs[3]);
+	int maxGatherNumber = (int)mxGetScalar(prhs[4]);
 
 	__int64 i64 = 0;
 
@@ -171,6 +166,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	}
 	mexPrintf("Task %d: Writing to %s \n \t\t | Traces %d | \n", groups, fnTemp, groupTraces);
 	}
+	fclose(streamIn);
 	fclose(streamOut);
 	mexPrintf("Well done!\n");
 

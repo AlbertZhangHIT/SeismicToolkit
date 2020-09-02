@@ -138,9 +138,6 @@ int main(int argc, char* argv[])
 	cout << "Well done!" << endl;
 	fclose(streamIn);
 	fclose(streamOut);
-	
-	free(bufTraceHeader);
-	free(bufTraceData);
 
 	return 0;
 }

@@ -37,15 +37,15 @@ int main(int argc, char* argv[])
 	mIter = opts.find("-outfilePrefix"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second);	ss >> fnOut;}
 
-	int maxTracePerShot = 100000;
-	mIter = opts.find("-maxTracePerShot");	assert(mIter != opts.end());
-	{istringstream ss((*mIter).second);	ss >> maxTracePerShot;}
+	int maxTracePerGather = 10000;
+	mIter = opts.find("-maxTracePerGather");	assert(mIter != opts.end());
+	{istringstream ss((*mIter).second);	ss >> maxTracePerGather;}
 
 	int gatherPerSubfile = 3;
 	mIter = opts.find("-gatherPerSubfile"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second); ss >> gatherPerSubfile;}
 
-	int maxGatherNumber = 1000000;
+	int maxGatherNumber = 10000;
 	mIter = opts.find("-maxGatherNumber"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second); ss >> maxGatherNumber;}
  
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 	preParam = new long long *[maxGatherNumber];
 	for (int i = 0; i < maxGatherNumber; i++)
 		preParam[i] = new long long[3];
-	preReader2D(streamIn, preParam, maxTracePerShot, nSample, bSample, gathersCount, tracesCount);
+	preReader2D(streamIn, preParam, maxTracePerGather, nSample, bSample, gathersCount, tracesCount);
 
 	cout << "--------------- Summary Information -------------\n" 
 		 << "#Traces    \t\t : " << tracesCount << "\n"
@@ -191,7 +191,10 @@ int main(int argc, char* argv[])
 		 << "\t\t | Traces " << groupTraces << " | "
 		 << endl;
 	}
-	fclose(streamOut);
+
 	cout << "Well done!" << endl;
+	fclose(streamIn);
+	fclose(streamOut);
+	
 	return 0;
 }
