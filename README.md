@@ -23,9 +23,11 @@ Run `Compile.m` in `mex` folder. (Don't forget to set up your C++ compiler)
 
 2. [shotExtract.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/shotExtract.m) This function extracts the traces according to the preset FFIDs into a new SEGY file. The example could be found in [example_extract_shotID.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/example_extract_shotID.m).
 
-3. [tracesExtract.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/tracesExtract.m) This function extracts the traces according to the preset index range into a new SEGY file. The example could be found in [example_extract_traces.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/example_extract_traces.m).
+3. [gatherSplit.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/gatherSplit.m) This function could split the large segy file into smaller ones, and each one constains certain number of gathers you set. The example is demonstrated in [example_split_segy.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/example_split_segy.m)
 
-4. [readCertainTraces.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/readCertainTraces.m) This function directly read traces from the large SGY file. It is not recommend to use the function directly if you are unfamiliar with the structrue of SGY file. Instead I recommend you to use [tracesExtract.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/tracesExtract.m) combined with `ReadSegy`function from [segymat](http://segymat.sourceforge.net/). The example can be found in [example_readtraces.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/example_readtraces.m)
+4. [tracesExtract.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/tracesExtract.m) This function extracts the traces according to the preset index range into a new SEGY file. The example could be found in [example_extract_traces.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/example_extract_traces.m).
+
+5. [readCertainTraces.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/readCertainTraces.m) This function directly read traces from the large SGY file. It is not recommend to use the function directly if you are unfamiliar with the structrue of SGY file. Instead I recommend you to use [tracesExtract.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/tracesExtract.m) combined with `ReadSegy`function from [segymat](http://segymat.sourceforge.net/). The example can be found in [example_readtraces.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/example_readtraces.m)
 
  # Examples
 
