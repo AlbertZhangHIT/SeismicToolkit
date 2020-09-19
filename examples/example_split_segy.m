@@ -5,4 +5,4 @@ outPrefix = 'D:\SeismicDataSet\CNN\Northwest_AI\TrainSet\005\005_dctl_8337';
 gatherPerfile = 1;
 maxTracesPerGather = 294;
 
-shotSplit(inFile, outPrefix, gatherPerfile, maxTracesPerShot);
+gatherSplit(inFile, outPrefix, gatherPerfile, maxTracesPerGather);
