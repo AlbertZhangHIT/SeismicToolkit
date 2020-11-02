@@ -16,7 +16,7 @@ in `src` subfolder. Three executables `gatherSplitor, shotExtractor` and `traceE
 
 2. Windows with MATLAB
    
-Run `Compile.m` in `mex` folder. (Don't forget to set up your C++ compiler)
+Run `Compile.m` in `mex` folder. (Don't forget to set up your C++ compiler to MinGW)
 # Functions for MATLAB
 
 1. [sgyParser.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/mex/sgyParser.m) This function parses the volume header of the SEGY file. The example can be found in [example_sgyparser.m](https://github.com/AlbertZhangHIT/SeismicToolkit/tree/master/examples/example_sgyparser.m).
