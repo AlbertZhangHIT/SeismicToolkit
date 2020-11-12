@@ -103,16 +103,10 @@ int main(int argc, char* argv[])
 	}
 
 	/* Get summary information of the input segy file */
-	int gathersCount, tracesCount;
-	long long **preParam;
-	preParam = new long long *[maxGatherNumber];
-	for (int i = 0; i < maxGatherNumber; i++)
-		preParam[i] = new long long[3];
-	preReader2D(streamIn, preParam, maxTracePerGather, nSample, bSample, gathersCount, tracesCount);
+	int tracesCount = (fileSize - 3600)/(bSample*nSample + charTraceHeader);
 
 	cout << "--------------- Summary Information -------------\n" 
 		 << "#Traces    \t\t : " << tracesCount << "\n"
-		 << "#Gathers     \t\t : " << gathersCount << "\n"
 		 << endl;
 
 	/*Check whether the input parameters are valid*/
