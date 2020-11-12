@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 	fwrite(buf3600, sizeof(char), charVolumeHeader, streamOut);
 	cout << "Extracting traces indexed: " << leftTraceIndex << "--" << rightTraceIndex << "\n"
 		 << "Writing to File: " << fnTemp << endl;
-	while(curPos < rightPos)
+	while(curPos <= rightPos)
 	{
 		fseeko(streamIn, curPos, SEEK_SET);
 		fread(bufTrace, sizeof(char), charPerTrace, streamIn);
