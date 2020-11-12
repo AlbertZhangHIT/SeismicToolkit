@@ -1,6 +1,6 @@
--infile
--outfilePrefix
--maxTracePerGather
--leftTraceIndex
--rightTraceIndex
--maxGatherNumber
+-infile /mnt/e/Projects/LabProject/shot23306154.segy
+-outfilePrefix /mnt/e/Projects/LabProject/shot23306154
+-maxTracePerGather 380
+-leftTraceIndex 1
+-rightTraceIndex 380
+-maxGatherNumber 1

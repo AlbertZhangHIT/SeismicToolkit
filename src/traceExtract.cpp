@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 	int charPerTrace = bSample*nSample + charTraceHeader; 
 	char bufTrace[charPerTrace];
 	leftPos = (long long)((leftTraceIndex-1)*charPerTrace + charVolumeHeader);
-	rightPos = (long long)(rightTraceIndex*charPerTrace + charVolumeHeader);
+	rightPos = (long long)((rightTraceIndex-1)*charPerTrace + charVolumeHeader);
 	curPos = leftPos;
 	outPos = 3600;
 
