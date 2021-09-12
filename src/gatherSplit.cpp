@@ -49,6 +49,15 @@ int main(int argc, char* argv[])
 	mIter = opts.find("-maxGatherNumber"); assert(mIter != opts.end());
 	{istringstream ss((*mIter).second); ss >> maxGatherNumber;}
  
+ 	int byte_shift = 0;
+ 	mIter = opts.find("-byteshift");
+ 	if(mIter != opts.end()){
+ 		istringstream ss((*mIter).second); ss >> maxGatherNumber;
+ 	} else{
+ 		cout << "No byte_shift assigned ... default to byte_shift=8 (8=FFID/16=SP)." << endl;
+ 		byte_shift = 8;
+ 	}
+
 	long long i64 = 0;
 	long long fileSize;
 	char buf1[1];
@@ -102,7 +111,7 @@ int main(int argc, char* argv[])
 	preParam = new long long *[maxGatherNumber];
 	for (int i = 0; i < maxGatherNumber; i++)
 		preParam[i] = new long long[3];
-	preReader2D(streamIn, preParam, maxTracePerGather, nSample, bSample, gathersCount, tracesCount);
+	preReader2D(streamIn, preParam, maxTracePerGather, nSample, bSample, gathersCount, tracesCount, byte_shift);
 
 	cout << "--------------- Summary Information -------------\n" 
 		 << "#Traces    \t\t : " << tracesCount << "\n"
@@ -139,7 +148,11 @@ int main(int argc, char* argv[])
 		posCur = posLeft;
 		gatherIDleft = preParam[(i-1)*gatherPerSubfile][0];
 		gatherIDright = preParam[i*gatherPerSubfile-1][0];
-		sprintf(fnTemp, "%s_gatherID_%d_%d.sgy", fnOut, gatherIDleft, gatherIDright);
+		if(gatherIDleft != gatherIDright){
+			sprintf(fnTemp, "%s_gatherID_%d_%d.sgy", fnOut, gatherIDleft, gatherIDright);
+		} else{
+			sprintf(fnTemp, "%s_gatherID_%d.sgy", fnOut, gatherIDleft);
+		}
 		streamOut = fopen(fnTemp, "wb");
 		fwrite(buf3600, sizeof(char), 3600, streamOut);
 		posOut = 3600;

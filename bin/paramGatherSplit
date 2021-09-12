@@ -3,3 +3,4 @@
 -maxTracePerShot 10000
 -gatherPerSubfile 1
 -maxGatherNumber 40000
+-byteshift 8

@@ -8,7 +8,7 @@
 using namespace std;
 
 void preReader2D(FILE* streamIn, long long **preParam, int maxTraces,
-  		int numSample, int byteSample, int& gatherCount, int& tracesCount)
+  		int numSample, int byteSample, int& gatherCount, int& tracesCount, int byte_shift)
 {
 	char bufHeader[240];
 	char buf4[4];
@@ -56,9 +56,9 @@ void preReader2D(FILE* streamIn, long long **preParam, int maxTraces,
 			fread(bufHeader, sizeof(char), 240, streamIn); // read trace header
 			pos += 240;
 
-			// extract shot id 9-12 byte
+			// extract ffid 9-12 byte, byte_shift=8; SP 17-21 bytes, byte_shfit=16
 			for(i = 0; i < 4; i++)
-				buf4[i] = bufHeader[8 + i];
+				buf4[i] = bufHeader[byte_shift + i]; 
 			stack_mov_4(buf4);
 			ffid_n = *((int *) buf4);
 

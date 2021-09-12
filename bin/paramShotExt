@@ -1,3 +1,4 @@
 -infile 
 -outfile 
--ShotID 
+-ShotID
+-inlineID 
