@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
  	int byte_shift = 0;
  	mIter = opts.find("-byteshift");
  	if(mIter != opts.end()){
- 		istringstream ss((*mIter).second); ss >> maxGatherNumber;
+ 		istringstream ss((*mIter).second); ss >> byte_shift;
  	} else{
  		cout << "No byte_shift assigned ... default to byte_shift=8 (8=FFID/16=SP)." << endl;
  		byte_shift = 8;
@@ -186,7 +186,11 @@ int main(int argc, char* argv[])
 		gatherIDleft = preParam[(groups-1)*gatherPerSubfile][0];
 		gatherIDright = preParam[gathersCount-1][0];
 	}
-	sprintf(fnTemp, "%s_gatherID_%d_%d.sgy", fnOut, gatherIDleft, gatherIDright);
+	if(gatherIDleft != gatherIDright){
+		sprintf(fnTemp, "%s_gatherID_%d_%d.sgy", fnOut, gatherIDleft, gatherIDright);
+	} else{
+		sprintf(fnTemp, "%s_gatherID_%d.sgy", fnOut, gatherIDleft);
+	}
 	streamOut = fopen(fnTemp, "wb");
 	fwrite(buf3600, sizeof(char), 3600, streamOut);
 	posOut = 3600;
