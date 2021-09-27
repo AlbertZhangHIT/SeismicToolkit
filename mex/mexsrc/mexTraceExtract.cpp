@@ -22,7 +22,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	int leftTraceIndex = (int)mxGetScalar(prhs[2]);
 	int rightTraceIndex = (int)mxGetScalar(prhs[3]);
 	int maxTracePerGather = (int)mxGetScalar(prhs[4]);
-	int maxGatherNumber = (int)mxGetScalar(prhs[5]);	
+	int maxGatherNumber = (int)mxGetScalar(prhs[5]);
+	int byteShift = (int)mxGetScalar(prhs[6]);	
 
 	__int64 i64 = 0;
 
@@ -80,7 +81,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	preParam = new long long *[maxGatherNumber];
 	for (int i = 0; i < maxGatherNumber; i++)
 		preParam[i] = new long long[3];
-	preReader2D(streamIn, preParam, maxTracePerGather, nSample, bSample, gatherCount, tracesCount);
+	preReader2D(streamIn, preParam, maxTracePerGather, nSample, bSample, gatherCount, tracesCount, byteShift);
 
 	mexPrintf("--------------- Summary Information -------------\n"); 
 	mexPrintf("#Traces    \t\t : %d\n", tracesCount);

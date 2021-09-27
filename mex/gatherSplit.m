@@ -19,7 +19,10 @@ end
 if ~exist('GatherPerSubfile', 'var')
 	gatherPerSubfile = 1;
 end
+if ~exist('byteShift', 'var')
+    byteShift = 8;
+end
 
-mexGatherSplit(infile, outprefix, gatherPerSubfile, maxTracePerGather, maxGatherNumber);
+mexGatherSplit(infile, outprefix, gatherPerSubfile, maxTracePerGather, maxGatherNumber, byteShift);
 
 end

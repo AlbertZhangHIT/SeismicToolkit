@@ -24,7 +24,7 @@ end
 if ~exist('firstTraceIndex', 'var')
 	firstTraceIndex = 1;
 end
-
-mexTraceExtract(infile, outprefix, firstTraceIndex, lastTraceIndex, maxTracePerGather, maxGatherNumber);
+byteShift = 8;
+mexTraceExtract(infile, outprefix, firstTraceIndex, lastTraceIndex, maxTracePerGather, maxGatherNumber, byteShift);
 
 end
